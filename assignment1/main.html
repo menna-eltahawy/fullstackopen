@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Random Image</title>
+    <title>Document</title>
 
     <style>
       body {
@@ -19,7 +19,6 @@
         width: 400px;
         height: 400px;
         object-fit: cover;
-        border-radius: 10px;
       }
 
       button {
@@ -27,11 +26,14 @@
         font-size: 16px;
         cursor: pointer;
       }
+      button :hover{
+        color: blue;
+      }
     </style>
   </head>
 
   <body>
-    <h1>if no image appere click on "Click Here"</h1>
+    <h1 style="background-color: rgb(175, 192, 21);">If no image apperes click on "Click Here"</h1>
     <img src="" alt="random image" />
     <button id="btn">Click Here</button>
 
@@ -44,7 +46,7 @@
 
       async function fetch_img() {
         const random = Math.floor(Math.random() * 1000);
-        const url = `https://picsum.photos/500/300?random=${random}`;
+        const url = `https://picsum.photos/400/400?random=${random}`;
 
         try {
             fetch('https://api.giphy.com/v1/gifs/translate?api_key=xXzM73AWYFCUQatRf2Ys3EYAU4ILCKZC&s=cats')
