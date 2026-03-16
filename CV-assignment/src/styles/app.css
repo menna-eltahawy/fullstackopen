@@ -1,0 +1,33 @@
+input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box; 
+  padding: 12px 15px;
+  margin-bottom: 15px;
+  border: 1px solid #ccd1d9;
+  border-radius: 5px;
+  font-size: 1rem;
+  background-color: #f0f4f8; 
+  color: #2c3e50 !important; 
+  transition: all 0.3s ease;
+}
+
+input::placeholder {
+  color: #8fa1b3;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #f0f4f8 inset !important;
+  -webkit-text-fill-color: #2c3e50 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+input:focus {
+  outline: none;
+  border-color: #0077ff;
+  background-color: #ffffff; 
+  box-shadow: 0 0 0 3px rgba(0, 119, 255, 0.15);
+}
