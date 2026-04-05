@@ -1,24 +1,43 @@
-const express = require("express");
-const app = express();
+require('dotenv').config()
 
-const personRoutes = require("./routes/personRoutes");
+const express = require('express')
+const app = express()
+const personRoutes = require('./routes/personRoutes')
+const Person = require('./models/person')
 
-app.use(express.json());
+app.use(express.json())
 
-app.use("/api", personRoutes);
+app.use('/api', personRoutes)
 
-// info route
-const { persons } = require("./models/person");
+app.get('/info', (req, res, next) => {
+  Person.countDocuments({})
+    .then(count => {
+      res.send(`
+        <p>Phonebook has info for ${count} people</p>
+        <p>${new Date()}</p>
+      `)
+    })
+    .catch(error => next(error))
+})
 
-app.get("/info", (req, res) => {
-    const date = new Date();
+const errorHandler = (error, req, res, next) => {
+  console.error(error.message)
 
-    res.send(`
-    <p>Phonebook has info for ${persons.length} people</p>
-    <p>${date}</p>
-  `);
-});
+  if (error.name === 'CastError') {
+    return res.status(400).json({ error: 'malformatted id' })
+  }
 
-app.listen(3001, () => {
-    console.log("Server running on port 3001");
-});
+  if (error.name === 'ValidationError') {
+    return res.status(400).json({ error: error.message })
+  }
+
+  next(error)
+}
+
+app.use(errorHandler)
+
+const PORT = process.env.PORT || 3001
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})

@@ -1,53 +1,55 @@
-const { persons } = require("../models/person");
+const Person = require('../models/person')
 
-// GET all
-exports.getAllPersons = (req, res) => {
-    res.json(persons);
-};
+exports.getAllPersons = (req, res, next) => {
+  Person.find({})
+    .then(persons => res.json(persons))
+    .catch(error => next(error))
+}
 
-// GET by id
-exports.getPersonById = (req, res) => {
-    const person = persons.find((p) => p.id === req.params.id);
+exports.getPersonById = (req, res, next) => {
+  Person.findById(req.params.id)
+    .then(person => {
+      if (person) res.json(person)
+      else res.status(404).end()
+    })
+    .catch(error => next(error))
+}
 
-    if (!person) {
-        return res.status(404).json({ error: "not found" });
+exports.addPerson = (req, res, next) => {
+  const { name, number } = req.body
+
+  if (!name || !number) {
+    return res.status(400).json({ error: 'name or number missing' })
+  }
+
+  Person.findOne({ name }).then(existing => {
+    if (existing) {
+      existing.number = number
+      return existing.save().then(updated => res.json(updated))
     }
 
-    res.json(person);
-};
+    const person = new Person({ name, number })
 
-// DELETE
-exports.deletePerson = (req, res) => {
-    const index = persons.findIndex((p) => p.id === req.params.id);
+    person.save()
+      .then(saved => res.json(saved))
+      .catch(error => next(error))
+  })
+}
 
-    if (index === -1) {
-        return res.status(404).json({ error: "not found" });
-    }
+exports.deletePerson = (req, res, next) => {
+  Person.findByIdAndDelete(req.params.id)
+    .then(() => res.status(204).end())
+    .catch(error => next(error))
+}
 
-    persons.splice(index, 1);
-    res.status(204).end();
-};
+exports.updatePerson = (req, res, next) => {
+  const { name, number } = req.body
 
-// POST
-exports.addPerson = (req, res) => {
-    const { name, number } = req.body;
-
-    if (!name || !number) {
-        return res.status(400).json({ error: "name or number missing" });
-    }
-
-    const exists = persons.find((p) => p.name === name);
-
-    if (exists) {
-        return res.status(400).json({ error: "name must be unique" });
-    }
-
-    const newPerson = {
-        id: Math.floor(Math.random() * 10000).toString(),
-        name,
-        number,
-    };
-
-    persons.push(newPerson);
-    res.status(201).json(newPerson);
-};
+  Person.findByIdAndUpdate(
+    req.params.id,
+    { name, number },
+    { new: true, runValidators: true, context: 'query' }
+  )
+    .then(updated => res.json(updated))
+    .catch(error => next(error))
+}
