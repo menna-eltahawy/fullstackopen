@@ -11,14 +11,14 @@ app.use("/api", personRoutes);
 const { persons } = require("./models/person");
 
 app.get("/info", (req, res) => {
-  const date = new Date();
+    const date = new Date();
 
-  res.send(`
+    res.send(`
     <p>Phonebook has info for ${persons.length} people</p>
     <p>${date}</p>
   `);
 });
 
 app.listen(3001, () => {
-  console.log("Server running on port 3001");
+    console.log("Server running on port 3001");
 });
