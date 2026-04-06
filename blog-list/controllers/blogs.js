@@ -3,14 +3,48 @@ const User = require('../models/user')
 const mongoose = require('mongoose')
 
 exports.getBlogs = async (request, response) => {
+  const { search, author, sortBy, order, page, limit } = request.query
   let query = {}
 
-  if (request.query.search) {
-    query.title = { $regex: request.query.search, $options: 'i' }
+  if (search) {
+    query.title = { $regex: search, $options: 'i' }
   }
 
-  const blogs = await Blog.find(query).populate('user', { username: 1, name: 1 })
-  response.json(blogs)
+  if (author) {
+    query.author = author
+  }
+
+  let sortOptions = {}
+  if (sortBy) {
+    if (sortBy !== 'likes') {
+      return response.status(400).json({ error: 'unsupported sort field' })
+    }
+    sortOptions[sortBy] = order === 'desc' ? -1 : 1
+  }
+
+  const pageNumber = Number(page) || 1
+  const pageSize = Number(limit) || 10
+  const skip = (pageNumber - 1) * pageSize
+
+  const totalItems = await Blog.countDocuments(query)
+
+  const blogs = await Blog.find(query)
+    .sort(sortOptions)
+    .skip(skip)
+    .limit(pageSize)
+    .populate('user', { username: 1, name: 1 })
+
+  const totalPages = Math.ceil(totalItems / pageSize)
+
+  response.json({
+    blogs,
+    metadata: {
+      currentPage: pageNumber,
+      pageSize,
+      totalItems,
+      totalPages
+    }
+  })
 }
 
 exports.createBlog = async (request, response, next) => {
