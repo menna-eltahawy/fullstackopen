@@ -4,5 +4,6 @@ const blogsController = require('../controllers/blogs')
 
 router.get('/', blogsController.getBlogs)
 router.post('/', blogsController.createBlog)
+router.patch('/:id/like', blogsController.likeBlog)
 
 module.exports = router
