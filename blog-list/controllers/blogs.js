@@ -1,6 +1,7 @@
 const Blog = require('../models/blog')
 const User = require('../models/user')
 const mongoose = require('mongoose')
+const jwt = require('jsonwebtoken')
 
 exports.getBlogs = async (request, response) => {
   const { search, author, sortBy, order, page, limit } = request.query
@@ -51,7 +52,13 @@ exports.createBlog = async (request, response, next) => {
   const body = request.body
 
   try {
-    const user = await User.findOne()
+    const decodedToken = jwt.verify(request.token, process.env.SECRET)
+    
+    if (!decodedToken.id) {
+      return response.status(401).json({ error: 'token invalid' })
+    }
+
+    const user = await User.findById(decodedToken.id)
 
     const blog = new Blog({
       title: body.title,
