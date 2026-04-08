@@ -1,7 +1,5 @@
 const Blog = require('../models/blog')
-const User = require('../models/user')
 const mongoose = require('mongoose')
-const jwt = require('jsonwebtoken')
 
 exports.getBlogs = async (request, response) => {
   const { search, author, sortBy, order, page, limit } = request.query
@@ -52,13 +50,11 @@ exports.createBlog = async (request, response, next) => {
   const body = request.body
 
   try {
-    const decodedToken = jwt.verify(request.token, process.env.SECRET)
-    
-    if (!decodedToken.id) {
-      return response.status(401).json({ error: 'token invalid' })
-    }
+    const user = request.user
 
-    const user = await User.findById(decodedToken.id)
+    if (!user) {
+      return response.status(401).json({ error: 'token missing or invalid' })
+    }
 
     const blog = new Blog({
       title: body.title,
@@ -98,6 +94,27 @@ exports.likeBlog = async (request, response, next) => {
     }
 
     response.json(updatedBlog)
+  } catch (error) {
+    next(error)
+  }
+}
+
+exports.deleteBlog = async (request, response, next) => {
+  try {
+    const blog = await Blog.findById(request.params.id)
+
+    if (!blog) {
+      return response.status(404).end()
+    }
+
+    const user = request.user
+
+    if (!user || blog.user.toString() !== user.id.toString()) {
+      return response.status(401).json({ error: 'only the creator can delete this blog' })
+    }
+
+    await Blog.findByIdAndDelete(request.params.id)
+    response.status(204).end()
   } catch (error) {
     next(error)
   }
